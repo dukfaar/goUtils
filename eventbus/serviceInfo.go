@@ -5,5 +5,6 @@ type ServiceInfo struct {
 	Hostname              string
 	Port                  string
 	GraphQLHttpEndpoint   string
+	GraphQLSchemaEndpoint string
 	GraphQLSocketEndpoint string
 }
