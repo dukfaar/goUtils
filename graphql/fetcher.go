@@ -127,7 +127,7 @@ func NewClientLoginHttpFetcher(fetcher *HttpFetcher, clientID string, clientSecr
 		fetcher:              fetcher,
 		clientID:             clientID,
 		clientSecret:         clientSecret,
-		accessTokenExpiresAt: time.Now(),
+		accessTokenExpiresAt: time.Unix(0, 0),
 	}
 }
 
