@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/gorilla/websocket"
 )
@@ -111,4 +112,58 @@ func (f *HttpFetcher) Fetch(request Request) (interface{}, error) {
 	}
 
 	return result["data"], nil
+}
+
+type ClientLoginHttpFetcher struct {
+	clientID             string
+	clientSecret         string
+	fetcher              *HttpFetcher
+	accessToken          string
+	accessTokenExpiresAt time.Time
+}
+
+func NewClientLoginHttpFetcher(fetcher *HttpFetcher, clientID string, clientSecret string) *ClientLoginHttpFetcher {
+	return &ClientLoginHttpFetcher{
+		fetcher:              fetcher,
+		clientID:             clientID,
+		clientSecret:         clientSecret,
+		accessTokenExpiresAt: time.Now(),
+	}
+}
+
+func (f *ClientLoginHttpFetcher) doLogin() error {
+	result, err := f.fetcher.Fetch(Request{
+		Query: `query {
+			clientlogin(clientId: "` + f.clientID + `", clientSecret: "` + f.clientSecret + `") {
+				accessToken
+				accessTokenExpiresAt
+			}
+		}`,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	clientlogin := Response{result}
+	token := clientlogin.GetObject("clientlogin")
+	f.accessToken = token.GetString("accessToken")
+	accessTokenExpiresAt, _ := token.GetInt64("accessTokenExpiresAt")
+
+	f.accessTokenExpiresAt = JSTimestampToTime(accessTokenExpiresAt)
+
+	f.fetcher.SetHeader("Authentication", "Bearer "+f.accessToken)
+	return nil
+}
+
+func (f *ClientLoginHttpFetcher) Fetch(request Request) (interface{}, error) {
+	now := time.Now()
+	if f.accessTokenExpiresAt.After(now) || f.accessTokenExpiresAt.Equal(now) {
+		err := f.doLogin()
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	return f.fetcher.Fetch(request)
 }
