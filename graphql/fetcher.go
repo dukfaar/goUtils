@@ -158,7 +158,7 @@ func (f *ClientLoginHttpFetcher) doLogin() error {
 
 func (f *ClientLoginHttpFetcher) Fetch(request Request) (interface{}, error) {
 	now := time.Now()
-	if f.accessTokenExpiresAt.After(now) || f.accessTokenExpiresAt.Equal(now) {
+	if f.accessTokenExpiresAt.Before(now) || f.accessTokenExpiresAt.Equal(now) {
 		err := f.doLogin()
 
 		if err != nil {
