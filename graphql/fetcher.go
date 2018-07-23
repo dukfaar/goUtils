@@ -132,7 +132,6 @@ func NewClientLoginHttpFetcher(fetcher *HttpFetcher, clientID string, clientSecr
 }
 
 func (f *ClientLoginHttpFetcher) doLogin() error {
-	fmt.Printf("%v %v\n", f.clientID, f.clientSecret)
 	result, err := f.fetcher.Fetch(Request{
 		Query: `query {
 			clientlogin(clientId: "` + f.clientID + `", clientSecret: "` + f.clientSecret + `") {
@@ -163,7 +162,7 @@ func (f *ClientLoginHttpFetcher) Fetch(request Request) (interface{}, error) {
 		err := f.doLogin()
 
 		if err != nil {
-			fmt.Printf("login to auth-server failed: %v", err)
+			fmt.Printf("login to auth-server failed: %v\n", err)
 			return nil, err
 		}
 
