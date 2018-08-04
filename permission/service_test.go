@@ -6,9 +6,7 @@ import (
 	"time"
 )
 
-func initService() *Service {
-	p := NewService()
-
+func initServicePermissions(p *Service) {
 	p.SetToken("t1", "u1", time.Now().Add(time.Hour*2))
 	p.SetToken("t2", "u2", time.Now().Add(time.Hour*2))
 	p.SetToken("t3", "u3", time.Now().Add(time.Hour*2))
@@ -32,10 +30,57 @@ func initService() *Service {
 	}
 	p.SetPermission(fmt.Sprintf("p%v", numPermissions), fmt.Sprintf("permission%v", numPermissions))
 	p.SetRole("r3", r3permissions)
+}
 
-	p.BuildUserPermissionData()
+func initService() *Service {
+	p := NewService()
+
+	initServicePermissions(p)
+
+	p.BuildAllUserPermissionData()
 
 	return p
+}
+
+func BenchmarkService_BuildAllUserPermissionData(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		b.StopTimer()
+		p := NewService()
+		initServicePermissions(p)
+		b.StartTimer()
+
+		p.BuildAllUserPermissionData()
+	}
+}
+
+func BenchmarkService_BuildUserPermissionData_U1(b *testing.B) {
+	p := NewService()
+	initServicePermissions(p)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		p.BuildUserPermissionData("u1")
+	}
+}
+
+func BenchmarkService_BuildUserPermissionData_U2(b *testing.B) {
+	p := NewService()
+	initServicePermissions(p)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		p.BuildUserPermissionData("u2")
+	}
+}
+
+func BenchmarkService_BuildUserPermissionData_U3(b *testing.B) {
+	p := NewService()
+	initServicePermissions(p)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		p.BuildUserPermissionData("u3")
+	}
 }
 
 func BenchmarkService_PermissionDoesntExist(b *testing.B) {
@@ -92,7 +137,7 @@ func BenchmarkService_DoesntHavePermission_ManyPermissions(b *testing.B) {
 	}
 }
 
-func TestService_TokenHasPermission(t *testing.T) {
+func TestService_BuildAllUsers_TokenHasPermission(t *testing.T) {
 	p := initService()
 
 	type args struct {
@@ -109,6 +154,40 @@ func TestService_TokenHasPermission(t *testing.T) {
 		{"permission granted", args{"t1", "permission3"}, true},
 		{"permission granted", args{"t1", "permission4"}, true},
 		{"permission granted", args{"t3", "permission999"}, true},
+		{"permission not granted", args{"t1", "permission5"}, false},
+		{"permission doesnt exist", args{"t1", "permission999999"}, false},
+		{"permission not granted", args{"t3", "permission10000"}, false},
+		{"token expired", args{"t4", "permission1"}, false},
+		{"token doesnt exist", args{"t99999", "permission1"}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := p.TokenHasPermission(tt.args.accessToken, tt.args.permission); got != tt.want {
+				t.Errorf("Service.TokenHasPermission() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestService_BuildUser_u1_TokenHasPermission(t *testing.T) {
+	p := NewService()
+	initServicePermissions(p)
+	p.BuildUserPermissionData("u1")
+
+	type args struct {
+		accessToken string
+		permission  string
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{"permission granted", args{"t1", "permission1"}, true},
+		{"permission granted", args{"t1", "permission2"}, true},
+		{"permission granted", args{"t1", "permission3"}, true},
+		{"permission granted", args{"t1", "permission4"}, true},
+		{"permission granted", args{"t3", "permission999"}, false},
 		{"permission not granted", args{"t1", "permission5"}, false},
 		{"permission doesnt exist", args{"t1", "permission999999"}, false},
 		{"permission not granted", args{"t3", "permission10000"}, false},

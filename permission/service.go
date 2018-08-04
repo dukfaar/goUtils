@@ -26,34 +26,66 @@ type Service struct {
 
 //NewService creates a new Service
 func NewService() *Service {
-	return &Service{
+	service := &Service{
 		tokenData:                 make(map[string]*TokenData),
 		userRoleData:              make(map[string][]string),
 		rolePermissionData:        make(map[string][]string),
 		permissionData:            make(map[string]string),
 		userPermissionDataIsBuilt: false,
 	}
+
+	service.userPermissionData.Store(make(map[string]map[string]bool))
+
+	return service
 }
 
-//BuildUserPermissionData builds a map to determine which permissions a user has
+func (m *Service) buildUserPermissionData(userID string) map[string]bool {
+	userRoles := m.userRoleData[userID]
+	data := make(map[string]bool)
+
+	for i := range userRoles {
+		rolePermissions := m.rolePermissionData[userRoles[i]]
+		for j := range rolePermissions {
+			data[m.permissionData[rolePermissions[j]]] = true
+		}
+	}
+
+	return data
+}
+
+func (m *Service) BuildUserPermissionData(userID string) {
+	m.userPermissionDataIsBuiltMutex.Lock()
+	defer m.userPermissionDataIsBuiltMutex.Unlock()
+
+	userPermissionData := m.userPermissionData.Load().(map[string]map[string]bool)
+	userPermissionData[userID] = m.buildUserPermissionData(userID)
+	m.userPermissionData.Store(userPermissionData)
+}
+
+//BuildAllUserPermissionData builds a map to determine which permissions a user has
 //call this after changing data
-func (m *Service) BuildUserPermissionData() {
+func (m *Service) BuildAllUserPermissionData() {
 	m.userPermissionDataIsBuiltMutex.Lock()
 	defer m.userPermissionDataIsBuiltMutex.Unlock()
 	if m.userPermissionDataIsBuilt == false {
 		newUserPermissionData := make(map[string]map[string]bool)
 
-		for userID := range m.userRoleData {
-			userRoles := m.userRoleData[userID]
-			newUserPermissionData[userID] = make(map[string]bool)
+		var dataMutex sync.Mutex
+		var wg sync.WaitGroup
+		wg.Add(len(m.userRoleData))
 
-			for i := range userRoles {
-				rolePermissions := m.rolePermissionData[userRoles[i]]
-				for j := range rolePermissions {
-					newUserPermissionData[userID][m.permissionData[rolePermissions[j]]] = true
-				}
-			}
+		for userID := range m.userRoleData {
+			go func(userID string) {
+				result := m.buildUserPermissionData(userID)
+				dataMutex.Lock()
+				newUserPermissionData[userID] = result
+				dataMutex.Unlock()
+				wg.Done()
+			}(userID)
 		}
+
+		wg.Wait()
+
 		m.userPermissionData.Store(newUserPermissionData)
 		m.userPermissionDataIsBuilt = true
 	}
@@ -62,10 +94,7 @@ func (m *Service) BuildUserPermissionData() {
 
 //SetToken sets the value of a Token in the Service
 func (m *Service) SetToken(accessToken string, userID string, expiresAt time.Time) {
-	m.userPermissionDataIsBuiltMutex.Lock()
-	defer m.userPermissionDataIsBuiltMutex.Unlock()
 	m.tokenData[accessToken] = &TokenData{userID, expiresAt}
-	m.userPermissionDataIsBuilt = false
 }
 
 //SetUser sets the value of a User in the Service

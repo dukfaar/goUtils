@@ -49,7 +49,6 @@ func AddAuthEventsHandlers(nsqEventbus *eventbus.NsqEventBus, permissionService 
 		}
 
 		permissionService.SetPermission(permissionMsg.ID, permissionMsg.Name)
-		permissionService.BuildUserPermissionData()
 
 		return nil
 	}
@@ -65,7 +64,7 @@ func AddAuthEventsHandlers(nsqEventbus *eventbus.NsqEventBus, permissionService 
 		}
 
 		permissionService.SetRole(roleMsg.ID, roleMsg.Permissions)
-		permissionService.BuildUserPermissionData()
+		permissionService.BuildAllUserPermissionData()
 
 		return nil
 	}
@@ -81,7 +80,7 @@ func AddAuthEventsHandlers(nsqEventbus *eventbus.NsqEventBus, permissionService 
 		}
 
 		permissionService.SetUser(userMsg.ID, userMsg.Roles)
-		permissionService.BuildUserPermissionData()
+		permissionService.BuildUserPermissionData(userMsg.ID)
 
 		return nil
 	}
@@ -113,7 +112,6 @@ func AddAuthEventsHandlers(nsqEventbus *eventbus.NsqEventBus, permissionService 
 		}
 
 		permissionService.SetToken(loginSuccess.UserID, loginSuccess.AccessToken, expiresAt)
-		permissionService.BuildUserPermissionData()
 		return nil
 	})
 }
