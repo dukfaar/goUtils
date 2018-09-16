@@ -5,7 +5,7 @@ import (
 	graphqlIntrospection "github.com/graph-gophers/graphql-go/introspection"
 )
 
-func emitRegisterEvents(eventName string, gqlType *graphqlIntrospection.Type, ebus eventbus.EventBus) {
+func EmitRegisterEvents(eventName string, gqlType *graphqlIntrospection.Type, ebus eventbus.EventBus) {
 	if gqlType == nil {
 		return
 	}
@@ -63,7 +63,7 @@ type TypeEvent struct {
 	Fields []string `json:"fields"`
 }
 
-func emitRegisterTypeEvents(eventName string, gqlTypes []*graphqlIntrospection.Type, ebus eventbus.EventBus) {
+func EmitRegisterTypeEvents(eventName string, gqlTypes []*graphqlIntrospection.Type, ebus eventbus.EventBus) {
 	if gqlTypes != nil {
 		for i := range gqlTypes {
 			gqlType := gqlTypes[i]
