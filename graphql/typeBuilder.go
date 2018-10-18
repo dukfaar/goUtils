@@ -54,6 +54,5 @@ func buildTypeBody(t reflect.Type) string {
 func Build(t reflect.Type) string {
 	result := fmt.Sprintf("type %s {\n%s\n}", t.Name(), buildTypeBody(t))
 
-	fmt.Println(result)
 	return result
 }
