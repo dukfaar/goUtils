@@ -27,13 +27,13 @@ func TestBuild(t *testing.T) {
 		t          reflect.Type
 		wantResult string
 	}{
-		{"", reflect.TypeOf((*A)(nil)).Elem(), "type A {\n\ta: Int\n\tb: B\n\tdName: String\n\n}"},
-		{"", reflect.TypeOf((*B)(nil)).Elem(), "type B {\n\tc: Boolean\n\n}"},
-		{"", reflect.TypeOf((*C)(nil)).Elem(), "type C {\n\ta: Int\n\tb: B\n\tdName: String\n\n}"},
+		{"", reflect.TypeOf((*A)(nil)).Elem(), "type ResultType {\n\ta: Int\n\tb: B\n\tdName: String\n\n}"},
+		{"", reflect.TypeOf((*B)(nil)).Elem(), "type ResultType {\n\tc: Boolean\n\n}"},
+		{"", reflect.TypeOf((*C)(nil)).Elem(), "type ResultType {\n\ta: Int\n\tb: B\n\tdName: String\n\n}"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if result := Build(tt.t); result != tt.wantResult {
+			if result := Build(tt.t, "ResultType"); result != tt.wantResult {
 				t.Errorf("Check() result = %v, wantResult %v", result, tt.wantResult)
 			}
 		})
