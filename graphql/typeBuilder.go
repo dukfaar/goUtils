@@ -26,6 +26,9 @@ func getType(f reflect.StructField) string {
 	case reflect.TypeOf((*bool)(nil)).Elem():
 		return "Boolean"
 	default:
+		if f.Type.Kind() == reflect.Ptr {
+			return f.Type.Elem().Name()
+		}
 		return f.Type.Name()
 	}
 }
