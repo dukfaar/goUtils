@@ -30,29 +30,29 @@ func getType(f reflect.StructField) string {
 	}
 }
 
-func getGqlTypeFieldName(f reflect.StructField) string {
+func getTypeFieldName(f reflect.StructField) string {
 	if n, ok := f.Tag.Lookup("gql"); ok {
 		return n
 	}
 	return f.Name
 }
 
-func buildGqlTypeField(f reflect.StructField) string {
-	return fmt.Sprintf("\t%s: %s\n", getGqlTypeFieldName(f), getGqlType(f))
+func buildTypeField(f reflect.StructField) string {
+	return fmt.Sprintf("\t%s: %s\n", getTypeFieldName(f), getType(f))
 }
 
-func buildGqlTypeBody(t reflect.Type) string {
+func buildTypeBody(t reflect.Type) string {
 	result := ""
 
 	for i := 0; i < t.NumField(); i++ {
-		result += buildGqlTypeField(t.Field(i))
+		result += buildTypeField(t.Field(i))
 	}
 
 	return result
 }
 
 func Build(t reflect.Type) string {
-	result := fmt.Sprintf("type %s {\n%s\n}", t.Name(), buildGqlTypeBody(t))
+	result := fmt.Sprintf("type %s {\n%s\n}", t.Name(), buildTypeBody(t))
 
 	fmt.Println(result)
 	return result
