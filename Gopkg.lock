@@ -5,8 +5,11 @@
   branch = "master"
   name = "github.com/globalsign/mgo"
   packages = [
+    ".",
     "bson",
-    "internal/json"
+    "internal/json",
+    "internal/sasl",
+    "internal/scram"
   ]
   revision = "eeefdecb41b842af6dc652aaea4026e8403e62df"
 
@@ -67,6 +70,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "92b87d852388a3fd7bcbfe2e29d98c8f573841393907f1d9fc7182530e00ad16"
+  inputs-digest = "f67c71310109a396616542904922268d091cdcfb4538ee8d402e2cb9efc2efc8"
   solver-name = "gps-cdcl"
   solver-version = 1
