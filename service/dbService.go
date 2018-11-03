@@ -23,7 +23,7 @@ type DBServiceWithQuery interface {
 }
 
 type BaseMgoServiceWithQuery struct {
-	collection *mgo.Collection
+	Collection *mgo.Collection
 }
 
 func (s *BaseMgoServiceWithQuery) MakeBaseQuery() bson.M {
