@@ -103,5 +103,26 @@ func (s *BaseMgoServiceWithQuery) HasElementAfterID(id string) (bool, error) {
 
 func (s *BaseMgoServiceWithQuery) Count() (int, error) {
 	count, err := s.Collection.Find(bson.M{}).Count()
+
 	return count, err
+}
+
+func (s *BaseMgoServiceWithQuery) GetSkipLimit(query bson.M, first *int32, last *int32) (int, int) {
+	var (
+		skip  int
+		limit int
+	)
+
+	if first != nil {
+		limit = int(*first)
+	}
+
+	if last != nil {
+		count, _ := s.Collection.Find(query).Count()
+
+		limit = int(*last)
+		skip = count - limit
+	}
+
+	return skip, limit
 }
