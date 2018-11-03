@@ -67,7 +67,7 @@ func GetHasPreviousAndNextPage(resultLength int, firstItemID string, lastItemID 
 	return hasPreviousPage, hasNextPage
 }
 
-func GetHasPreviousAndNextPageWithQuery(query bson.M, resultLength int, firstItemID string, lastItemID string, service service.DBService) (chan bool, chan bool) {
+func GetHasPreviousAndNextPageWithQuery(query bson.M, resultLength int, firstItemID string, lastItemID string, service service.DBServiceWithQuery) (chan bool, chan bool) {
 	hasPreviousPage := make(chan bool)
 	hasNextPage := make(chan bool)
 
