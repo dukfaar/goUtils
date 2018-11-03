@@ -55,7 +55,7 @@ func (s *BaseMgoServiceWithQuery) HasElementBeforeIDWithQuery(inquery bson.M, id
 		"$lt": bson.ObjectIdHex(id),
 	}
 
-	count, err := s.collection.Find(query).Count()
+	count, err := s.Collection.Find(query).Count()
 	return count > 0, err
 }
 
@@ -70,12 +70,12 @@ func (s *BaseMgoServiceWithQuery) HasElementAfterIDWithQuery(inquery bson.M, id 
 		"$gt": bson.ObjectIdHex(id),
 	}
 
-	count, err := s.collection.Find(query).Count()
+	count, err := s.Collection.Find(query).Count()
 	return count > 0, err
 }
 
 func (s *BaseMgoServiceWithQuery) CountWithQuery(query bson.M) (int, error) {
-	count, err := s.collection.Find(query).Count()
+	count, err := s.Collection.Find(query).Count()
 	return count, err
 }
 
@@ -86,7 +86,7 @@ func (s *BaseMgoServiceWithQuery) HasElementBeforeID(id string) (bool, error) {
 		"$lt": bson.ObjectIdHex(id),
 	}
 
-	count, err := s.collection.Find(query).Count()
+	count, err := s.Collection.Find(query).Count()
 	return count > 0, err
 }
 
@@ -97,11 +97,11 @@ func (s *BaseMgoServiceWithQuery) HasElementAfterID(id string) (bool, error) {
 		"$gt": bson.ObjectIdHex(id),
 	}
 
-	count, err := s.collection.Find(query).Count()
+	count, err := s.Collection.Find(query).Count()
 	return count > 0, err
 }
 
 func (s *BaseMgoServiceWithQuery) Count() (int, error) {
-	count, err := s.collection.Find(bson.M{}).Count()
+	count, err := s.Collection.Find(bson.M{}).Count()
 	return count, err
 }
